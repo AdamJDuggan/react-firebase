@@ -8,6 +8,9 @@ import PasswordForgetPage from '../PasswordForget'
 import HomePage from '../Home'
 import AccountPage from '../Account'
 import AdminPage from '../Admin'
+import { withAuthentication } from '../Session'
+
+
 
 import * as ROUTES from '../../constants/routes'
 
@@ -25,5 +28,7 @@ const App = () => (
             <Route exact path={ROUTES.ADMIN} component={AdminPage} />
         </Router>
     </>
-);
-export default App
+)
+
+
+export default withAuthentication(App)

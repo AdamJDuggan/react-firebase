@@ -1,9 +1,5 @@
-< !--The core Firebase JS SDK is always required and must be listed first-- >
-    <script src="https://www.gstatic.com/firebasejs/7.5.2/firebase-app.js"></script>
-
-    <!--TODO: Add SDKs for Firebase products that you want to use
-https://firebase.google.com/docs/web/setup#available-libraries -->
 import app from 'firebase/app'
+import 'firebase/auth'
 
 const config = {
     apiKey: "AIzaSyCItUbpNkGjqQalKTte9thgqCE-qzJWTU0",
@@ -19,6 +15,26 @@ const config = {
 class Firebase {
     constructor() {
         app.initializeApp(config)
+        this.auth = app.auth()
     }
+
+    // *** Auth API- define auhentication functions as class methods ***
+    doCreateUserWithEmailAndPassword = (email, password) =>
+        this.auth.createUserWithEmailAndPassword(email, password)
+
+    // Set up the login/sign-in function
+    doSignInWithEmailAndPassword = (email, password) =>
+        this.auth.signInWithEmailAndPassword(email, password)
+
+    // For sign out we don’t need to pass any argument to it, because Firebase knows about the currently authenticated user. 
+    //If no user is authenticated, nothing will happen when this function is called
+    doSignOut = () => this.auth.signOut()
+
+    doPasswordReset = email => this.auth.sendPasswordResetEmail(email)
+
+    doPasswordUpdate = password =>
+        this.auth.currentUser.updatePassword(password)
+
 }
+
 export default Firebase
