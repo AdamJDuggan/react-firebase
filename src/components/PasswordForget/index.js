@@ -8,7 +8,7 @@ const PasswordForgetPage = () => (
         <header className="hero is-primary">
             <div className="hero-body">
                 <div className="container">
-                    <h1 className="title">Password forget</h1>
+                    <h1 className="title">Forgot password</h1>
                 </div>
             </div>
         </header>
@@ -44,8 +44,8 @@ class PasswordForgetFormBase extends Component {
         const { email, error } = this.state
         const isInvalid = email === ''
         return (
-            <form onSubmit={this.onSubmit}>
-
+            <form class="card" style={{ padding: '20px' }} onSubmit={this.onSubmit}>
+                <h2 className="title">Password reset</h2>
                 <div className="field">
                     <label className="label">Password</label>
                     <input
@@ -69,7 +69,7 @@ const PasswordForgetLink = () => (
     <p>
         <Link to={ROUTES.PASSWORD_FORGET}>Forgot Password?</Link>
     </p>
-);
+)
 export default PasswordForgetPage;
 const PasswordForgetForm = withFirebase(PasswordForgetFormBase)
 export { PasswordForgetForm, PasswordForgetLink }

@@ -3,6 +3,8 @@ import { Link, withRouter } from 'react-router-dom'
 import { withFirebase } from '../Firebase'
 import * as ROUTES from '../../constants/routes'
 import { compose } from 'recompose'
+import { PasswordForgetLink } from '../PasswordForget'
+
 
 
 
@@ -18,6 +20,7 @@ const SignInPage = () => (
         </header>
         <main style={{ marginTop: '20px' }} className="container">
             <SignInForm />
+            <PasswordForgetLink />
             <SignUpLink />
 
         </main>
