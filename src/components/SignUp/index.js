@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { withFirebase } from '../Firebase'
-import * as ROUTES from '../../constants/routes'
 import { compose } from 'recompose'
-
+import * as ROUTES from '../../constants/routes'
+import * as ROLES from '../../constants/roles'
 
 
 // Page which gets displayed on router
@@ -27,6 +27,7 @@ const INITIAL_STATE = {
     email: '',
     passwordOne: '',
     passwordTwo: '',
+    isAdmin: false,
     error: null,
 }
 
@@ -37,21 +38,36 @@ class SignUpFormBase extends Component {
     }
     onChange = event => { this.setState({ [event.target.name]: event.target.value }) }
     onSubmit = event => {
-        const { username, email, passwordOne } = this.state
+        const { username, email, passwordOne, isAdmin } = this.state
+        const roles = {}
+        if (isAdmin) { roles[ROLES.ADMIN] = ROLES.ADMIN }
         this.props.firebase
             .doCreateUserWithEmailAndPassword(email, passwordOne)
             .then(authUser => {
+                // Create a user in your Firebase realtime database
+                return this.props.firebase
+                    .user(authUser.user.uid)
+                    .set({
+                        username,
+                        email,
+                        roles
+                    })
+            })
+            .then(() => {
                 this.setState({ ...INITIAL_STATE })
                 this.props.history.push(ROUTES.HOME)
             })
             .catch(error => {
                 this.setState({ error })
-            });
+            })
         event.preventDefault()
     }
+    onChangeCheckbox = event => {
+        this.setState({ [event.target.name]: event.target.checked })
+    };
 
     render() {
-        const { username, email, passwordOne, passwordTwo, error } = this.state
+        const { username, email, passwordOne, passwordTwo, isAdmin, error } = this.state
         const isInvalid = passwordOne !== passwordTwo || passwordOne === '' || email === '' || username === ''
 
         return (
@@ -80,6 +96,16 @@ class SignUpFormBase extends Component {
                     <input name="passwordTwo" type="password" value={passwordTwo}
                         onChange={this.onChange} class="input" />
                 </div>
+                <label class="checkbox">
+                    <input
+                        style={{ marginBottom: '15px' }}
+                        name="isAdmin"
+                        type="checkbox"
+                        checked={isAdmin}
+                        onChange={this.onChangeCheckbox}
+                    />  Make admin
+                    </label>
+                <br />
                 <button style={{ marginBottom: '15px' }} disabled={isInvalid} type="submit" className="button is-primary">Submit</button>
                 {error && <div key={alert.id} className="notification is-danger">{error.message}</div>}
                 <hr />

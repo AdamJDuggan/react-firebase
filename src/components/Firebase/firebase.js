@@ -1,5 +1,6 @@
 import app from 'firebase/app'
 import 'firebase/auth'
+import 'firebase/database'
 
 const config = {
     apiKey: "AIzaSyCItUbpNkGjqQalKTte9thgqCE-qzJWTU0",
@@ -14,27 +15,61 @@ const config = {
 
 class Firebase {
     constructor() {
-        app.initializeApp(config)
-        this.auth = app.auth()
+        app.initializeApp(config);
+
+        this.auth = app.auth();
+        this.db = app.database();
     }
 
-    // *** Auth API- define auhentication functions as class methods ***
+    // *** Auth API ***
+
     doCreateUserWithEmailAndPassword = (email, password) =>
-        this.auth.createUserWithEmailAndPassword(email, password)
+        this.auth.createUserWithEmailAndPassword(email, password);
 
-    // Set up the login/sign-in function
     doSignInWithEmailAndPassword = (email, password) =>
-        this.auth.signInWithEmailAndPassword(email, password)
+        this.auth.signInWithEmailAndPassword(email, password);
 
-    // For sign out we don’t need to pass any argument to it, because Firebase knows about the currently authenticated user. 
-    //If no user is authenticated, nothing will happen when this function is called
-    doSignOut = () => this.auth.signOut()
+    doSignOut = () => this.auth.signOut();
 
-    doPasswordReset = email => this.auth.sendPasswordResetEmail(email)
+    doPasswordReset = email => this.auth.sendPasswordResetEmail(email);
 
     doPasswordUpdate = password =>
-        this.auth.currentUser.updatePassword(password)
+        this.auth.currentUser.updatePassword(password);
 
+    // *** Merge Auth and DB User API *** //
+
+    onAuthUserListener = (next, fallback) =>
+        this.auth.onAuthStateChanged(authUser => {
+            if (authUser) {
+                this.user(authUser.uid)
+                    .once('value')
+                    .then(snapshot => {
+                        const dbUser = snapshot.val();
+
+                        // default empty roles
+                        if (!dbUser.roles) {
+                            dbUser.roles = [];
+                        }
+
+                        // merge auth and db user
+                        authUser = {
+                            uid: authUser.uid,
+                            email: authUser.email,
+                            ...dbUser,
+                        };
+
+                        next(authUser);
+                    });
+            } else {
+                fallback();
+            }
+        });
+
+    // *** User API ***
+
+    user = uid => this.db.ref(`users/${uid}`);
+
+    users = () => this.db.ref('users');
 }
 
-export default Firebase
+export default Firebase;
